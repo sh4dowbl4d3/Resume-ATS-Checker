@@ -1,7 +1,6 @@
 # ResumeLint
 
-> **Lint your resume before recruiters do.**  
-> *100% Private, Client-Side Resume ATS Checker & Analyzer powered by WebAssembly.*
+ResumeLint is an in-browser resume checker and ATS analyzer powered by WebAssembly. All parsing and scoring run locally on your machine without server requests.
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-brightgreen)](https://sh4dowbl4d3.github.io/ResumeLint/)
 [![Deploy to GitHub Pages](https://github.com/sh4dowbl4d3/ResumeLint/actions/workflows/deploy.yml/badge.svg)](https://github.com/sh4dowbl4d3/ResumeLint/actions/workflows/deploy.yml)
@@ -11,45 +10,33 @@
 
 ![ResumeLint Interface](screenshots/screenshot1.png)
 
----
+## Live application
 
-## Live Web Application
+Try the app in your browser: [sh4dowbl4d3.github.io/ResumeLint](https://sh4dowbl4d3.github.io/ResumeLint/)
 
-ResumeLint is hosted and accessible directly in your browser:
+It requires no installation or account. Everything runs locally in your browser.
 
-**[https://sh4dowbl4d3.github.io/ResumeLint/](https://sh4dowbl4d3.github.io/ResumeLint/)**
+## Privacy
 
-No installation, backend setup, or local environment required. Everything runs 100% client-side in your browser via WebAssembly.
+Resume scanners often upload documents to remote servers for processing. ResumeLint performs all analysis on your machine:
 
----
+- Files (PDF, DOCX, TXT, and Markdown) parse directly in browser memory.
+- The scoring engine runs in a dedicated Web Worker via WebAssembly compiled from Rust.
+- Network requests are not used during analysis. You can disconnect your network after the page loads and continue using the app.
 
-## 100% Client-Side Privacy Guarantee
+## How ATS scoring works
 
-Most resume scanners upload your personal contact information, work history, and proprietary job descriptions to cloud servers.
+ResumeLint calculates a deterministic score from 0 to 100 across five weighted categories:
 
-**ResumeLint is fundamentally different:**
-- **Zero Backend Required**: No server API endpoints, no external databases, no third-party AI APIs.
-- **In-Browser Document Parsing**: PDF, DOCX, TXT, and Markdown files are unpacked directly in memory using JavaScript and WebAssembly.
-- **Local Rust ATS Engine**: Scored inside a dedicated Web Worker running Rust-compiled WebAssembly.
-- **Zero Data Leakage**: Disconnect your internet connection after loading the page — ResumeLint works completely offline.
-
----
-
-## How ATS Scoring Works
-
-ResumeLint computes a deterministic score (0–100) across 5 weighted dimensions:
-
-| Dimension | Weight | Evaluation Criteria |
+| Category | Weight | Criteria |
 |:---|:---:|:---|
-| **Keyword Match** | **30%** | Unigram & bigram frequency ratio between resume and job description |
-| **Skills Match** | **25%** | Curated database of 120+ technical, tool, and domain skills with variant matching |
-| **Experience Relevance** | **20%** | Action verb density, chronological indicators, and role terminology |
-| **Formatting / Readability** | **15%** | Detection of parsing traps (tables, multi-columns, text boxes, icon bullets) |
-| **Section Completeness** | **10%** | Presence of standard ATS sections (Summary, Experience, Education, Skills) |
+| Keyword match | 30% | Unigram and bigram frequency ratios between the resume and job description |
+| Skills match | 25% | Match against 120+ technical and domain skills, including aliases and variants |
+| Experience relevance | 20% | Action verb density, chronological markers, and role terminology |
+| Formatting and readability | 15% | Layout checks for tables, multi-column text, text boxes, and icon bullets |
+| Section completeness | 10% | Presence of standard resume sections (Summary, Experience, Education, Skills) |
 
----
-
-## Architecture & Technology Stack
+## Architecture
 
 ```
 ResumeLint/
@@ -82,32 +69,24 @@ ResumeLint/
     └── deploy.yml
 ```
 
-- **Core Scoring Engine:** Rust + `wasm-bindgen` + `serde-wasm-bindgen`
-- **Frontend Framework:** React 18, React Router v7
-- **Styling:** Tailwind CSS, Lucide Icons
-- **Document Extractors:** `pdfjs-dist` (PDF geometry text), `mammoth` (DOCX XML), `FileReader` (Text/Markdown)
-- **Deployment:** GitHub Pages (Static hosting with zero backend server dependencies)
+The system separates document extraction, worker communication, and scoring:
+- Rust with `wasm-bindgen` and `serde-wasm-bindgen` powers the WebAssembly scoring engine.
+- React 18 and React Router v7 handle UI routing and state, styled with Tailwind CSS and Lucide icons.
+- In-browser document extraction uses `pdfjs-dist` for PDF layout extraction, `mammoth` for DOCX files, and `FileReader` for plain text or Markdown.
+- GitHub Pages hosts the static client assets.
 
----
+## Development and testing
 
-## Testing
+- Run Rust tests: `cargo test --manifest-path wasm/Cargo.toml`
+- Run frontend tests: `npm test` (from `frontend/`)
+- Rebuild WebAssembly binary: `bash scripts/build_wasm.sh`
 
-ResumeLint features a comprehensive test suite across Rust, WebAssembly, document parsers, worker RPC, and end-to-end fixture parity.
+## Export options
 
-- **Rust Unit & Parity Tests**: `cargo test --manifest-path wasm/Cargo.toml`
-- **Frontend & Integration Tests**: `npm test` (inside `frontend/`)
-- **WebAssembly Build**: `bash scripts/build_wasm.sh`
-
----
-
-## Export Options
-
-Generate reports directly from the Results screen:
-- **Markdown Export (`.md`)**: Copy to clipboard or download formatted Markdown report.
-- **JSON Export (`.json`)**: Raw structured ATS telemetry data.
-- **Print / PDF**: Clean printer-friendly stylesheet for saving as PDF.
-
----
+You can export evaluation results from the results screen:
+- Markdown (`.md`): copy to clipboard or download as a formatted report.
+- JSON (`.json`): structured scoring breakdown and extracted attributes.
+- Print or PDF: printer-friendly styling for saving a PDF report.
 
 ## License
 
